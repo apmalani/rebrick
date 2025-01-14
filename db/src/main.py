@@ -45,7 +45,7 @@ def dummy_create_database():
         )
 
 # query
-def dummy_query_database(query, dummy_namespace = 'rebrick_base'):
+def dummy_query_database_by_embed(query, dummy_namespace = 'rebrick_base'):
     query_embeds = pc.inference.embed(
         model = 'multilingual-e5-large',
         inputs = [query],
@@ -62,3 +62,10 @@ def dummy_query_database(query, dummy_namespace = 'rebrick_base'):
 
     return results # TODO : format results for api
 
+def dummy_query_database_by_id(id, dummy_namespace = 'rebrick_base'):
+    results = index.query(
+        namespace = dummy_namespace,
+        id = id,
+        top_k = 12,
+        include_values = False
+    )
