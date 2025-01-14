@@ -1,4 +1,6 @@
 import pinecone
+import pandas as pd
+from pinecone_datasets import list_datasets, load_dataset
 from dotenv import load_dotenv
 import os
 
@@ -18,10 +20,10 @@ def dummy_create_database():
                 region = 'us-east-1'
             )
         )
-    
+    else:
         index = pinecone.index('legosets')
         
-        # TODO: data = pd.read_csv()
+        data = pd.read_csv('../data/full_sets_200_plus.csv')
         
         # create vector embeddings on set names
         embeds = pc.inference.embed(
@@ -39,13 +41,14 @@ def dummy_create_database():
                 'metadata': {} # TODO: insert specific values (year, class, parts)
             })
         
-        index.upsert(
+        index.upsert_from_dataframe(
             vector = records,
             namespace = 'rebrick_base'
         )
 
 # query
 def dummy_query_database_by_embed(query, dummy_namespace = 'rebrick_base'):
+    index = pinecone.index('legosets')
     query_embeds = pc.inference.embed(
         model = 'multilingual-e5-large',
         inputs = [query],
@@ -54,7 +57,7 @@ def dummy_query_database_by_embed(query, dummy_namespace = 'rebrick_base'):
 
     results = index.query(
         namespace = dummy_namespace,
-        vector = query_embeddings[0].values,
+        vector = query_embeds[0].values,
         top_k = 12,
         include_values = False,
         include_metadata = True
@@ -63,9 +66,12 @@ def dummy_query_database_by_embed(query, dummy_namespace = 'rebrick_base'):
     return results # TODO : format results for api
 
 def dummy_query_database_by_id(id, dummy_namespace = 'rebrick_base'):
+    index = pinecone.index('legosets')
     results = index.query(
         namespace = dummy_namespace,
         id = id,
         top_k = 12,
         include_values = False
     )
+
+    return results
