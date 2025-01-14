@@ -75,3 +75,7 @@ def dummy_query_database_by_id(id, dummy_namespace = 'rebrick_base'):
     )
 
     return results
+
+def delete_index():
+    index = pinecone.index('legosets')
+    pinecone.delete_index(index)
