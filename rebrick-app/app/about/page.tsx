@@ -24,7 +24,6 @@ export default function Home() {
                   Top 10
                 </Link>
               </li>
-
             </ul>
           </nav>
         </div>
@@ -35,20 +34,8 @@ export default function Home() {
         <div className="w-full max-w-2xl pt-4">
           {/* Main Title */}
           <h1 className="text-5xl font-bold text-center mb-2 text-gray-800">
-            ReBrick
+            About
           </h1>
-          {/* Subtitle */}
-          <h2 className="text-xl text-center mb-4 text-gray-500">
-            Get the most brick for your buck
-          </h2>
-          {/* Big Search Bar */}
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search for a LEGO set"
-              className="w-full px-6 py-4 text-xl border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            />
-          </div>
         </div>
       </div>
     </>
