@@ -1,33 +1,22 @@
-"use client"
-
+"use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
-  const [searchValue, setSearchValue] = useState("");
-  const [results, setResults] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const router = useRouter();
 
-  const handleSearch = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    try {
-      const response = await fetch("http://127.0.0.1:8000/search_embed", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ query: searchValue }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Search API error");
-      }
-      const data = await response.json();
-      setResults(data);
-    } catch (error) {
-      console.error("Error during search:", error);
+    // Only navigate if there's a non-empty search query
+    if (searchQuery.trim()) {
+      // Push a route to /search with the query parameter.
+      router.push(`/search?query=${encodeURIComponent(searchQuery)}`);
     }
-  };
 
+  };
+  
   return (
     <>
       {/* Fixed Header */}
@@ -60,21 +49,16 @@ export default function Home() {
       <div className="flex items-center justify-center bg-white" style={{ minHeight: "calc(100vh - 64px)" }}>
         <div className="w-full max-w-2xl pt-4">
           <h1 className="text-5xl font-bold text-center mb-2 text-gray-800">ReBrick</h1>
-          <h2 className="text-xl text-center mb-4 text-gray-500">Get the most brick for your buck</h2>
-          <form onSubmit={handleSearch} className="relative">
+          <h2 className="text-xl text-center mb-4 text-gray-500">Search for similar LEGO sets</h2>
+          <form onSubmit={handleSubmit} className="relative">
             <input
               type="text"
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search for a LEGO set"
               className="w-full px-6 py-4 text-xl border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
             />
           </form>
-          {results && (
-            <div className="mt-4">
-              <pre>{JSON.stringify(results, null, 2)}</pre>
-            </div>
-          )}
         </div>
       </div>
     </>

@@ -68,7 +68,7 @@ def dummy_query_database_by_embed(query, dummy_namespace='rebrick_base'):
     results = index.query(
         namespace=dummy_namespace,
         vector=query_embeds.data[0]['values'],
-        top_k=10,
+        top_k=192,
         include_values=False,
         include_metadata=True
     )
