@@ -1,8 +1,9 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
-import { useSearchParams } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
+// Define the structure for each search result
 interface Match {
   id: string;
   score: number;
@@ -17,28 +18,33 @@ interface Match {
 }
 
 export default function SearchPage() {
-  // Get the query parameter from the URL (e.g., /search?query=LEGO)
   const searchParams = useSearchParams();
-  const query = searchParams.get("query") || "";
-  
+  const router = useRouter();
+  const initialQuery = searchParams.get("query") || "";
+
+  // Local state for the search input, pre-filled from the URL query
+  const [searchValue, setSearchValue] = useState(initialQuery);
+
+  // State for search results and loading status
   const [results, setResults] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
-  
-  // for infinite scrolling: track current "page" (each page shows 12 items)
+
+  // Infinite scrolling: each "page" shows 12 items
   const [page, setPage] = useState(1);
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  
-  // When the query changes, fetch the results & reset page count
+
+  // Fetch new results when the URL query changes
   useEffect(() => {
-    if (query) {
-      setPage(1); // reset to first page when query changes
+    setSearchValue(initialQuery);
+    if (initialQuery) {
+      setPage(1); // Reset to the first page for new searches
       const fetchResults = async () => {
         setLoading(true);
         try {
           const response = await fetch("http://127.0.0.1:8000/search_embed", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ query }),
+            body: JSON.stringify({ query: initialQuery }),
           });
           if (!response.ok) {
             throw new Error(`Error: ${response.status}`);
@@ -53,66 +59,64 @@ export default function SearchPage() {
       };
       fetchResults();
     }
-  }, [query]);
-  
-  // Infinite scrolling: when the loadMoreRef becomes visible, increase page count
+  }, [initialQuery]);
+
+  // Setup an Intersection Observer for infinite scrolling
   useEffect(() => {
     if (!loading) {
       const observer = new IntersectionObserver((entries) => {
-        // If the load-more element is visible and more items exist, load next page
-        if (entries[0].isIntersecting) {
-          if (page * 12 < results.length) {
-            setPage((prevPage) => prevPage + 1);
-          }
+        if (entries[0].isIntersecting && page * 12 < results.length) {
+          setPage((prev) => prev + 1);
         }
       });
-      if (loadMoreRef.current) {
-        observer.observe(loadMoreRef.current);
-      }
+      if (loadMoreRef.current) observer.observe(loadMoreRef.current);
       return () => {
-        if (loadMoreRef.current) {
-          observer.unobserve(loadMoreRef.current);
-        }
+        if (loadMoreRef.current) observer.unobserve(loadMoreRef.current);
       };
     }
   }, [loading, page, results]);
-  
-  // Only show numberOfResults = page * 12 items from the results array
+
+  // Only display results up to (page × 12)
   const visibleResults = results.slice(0, page * 12);
-  
+
+  // On search submission, navigate to /search?query=...
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (searchValue.trim()) {
+      router.push(`/search?query=${encodeURIComponent(searchValue)}`);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Fixed Header (unchanged; reused across pages) */}
-      <header className="fixed top-0 left-0 right-0 shadow-md z-10 bg-white">
-        <div className="flex items-center justify-start p-4 w-full">
-          <Link href="/" className="text-2xl font-bold text-gray-800">
-            ReBrick
+      {/* Fixed Header: single row with logo, centered search bar, and nav links */}
+      <header className="fixed top-0 left-0 right-0 z-10 bg-white shadow-md flex items-center px-4 py-2">
+        <Link href="/" className="text-2xl font-bold text-gray-800">
+          ReBrick
+        </Link>
+        {/* Centered Search Bar */}
+        <form onSubmit={handleSearchSubmit} className="flex-grow mx-4">
+          <input
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Search for a LEGO set"
+            className="w-full px-6 py-2 text-xl border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+          />
+        </form>
+        {/* Navigation Links */}
+        <nav className="hidden md:flex space-x-6">
+          <Link href="/about" className="text-gray-600 hover:text-gray-800">
+            About
           </Link>
-          <nav className="ml-8">
-            <ul className="flex space-x-6">
-              <li>
-                <Link
-                  href="/about"
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  About
-                </Link>
-              </li>
-              <li>
-                <Link
-                  href="/top10"
-                  className="text-gray-600 hover:text-gray-800"
-                >
-                  Top 10
-                </Link>
-              </li>
-            </ul>
-          </nav>
-        </div>
+          <Link href="/top10" className="text-gray-600 hover:text-gray-800">
+            Top 10
+          </Link>
+        </nav>
       </header>
-  
-      {/* Main content area */}
-      <main className="p-4 pt-20">
+
+      {/* Main Content Area with extra top padding */}
+      <main className="pt-20 p-4">
         {loading && page === 1 ? (
           <p className="text-center text-gray-500">Loading...</p>
         ) : visibleResults.length > 0 ? (
@@ -149,8 +153,7 @@ export default function SearchPage() {
         ) : (
           <p className="text-center text-gray-500">No results found.</p>
         )}
-        
-        {/* This div is observed for infinite scrolling */}
+        {/* Sentinel element for infinite scrolling */}
         <div ref={loadMoreRef} className="h-4"></div>
         {loading && page > 1 && (
           <p className="text-center text-gray-500 mt-4">Loading more...</p>

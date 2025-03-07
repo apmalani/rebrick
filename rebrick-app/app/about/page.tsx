@@ -4,15 +4,14 @@ import Link from "next/link";
 export default function Home() {
   return (
     <>
-      {/* Fixed Header */}
       <header className="fixed top-0 left-0 right-0 z-10 bg-white">
-        <div className="flex items-center justify-start p-4 w-full">
+        <div className="flex items-center justify-between p-4 w-full">
           {/* "ReBrick" Logo linking to Home */}
           <Link href="/" className="text-2xl font-bold text-gray-800">
             ReBrick
           </Link>
           {/* Navigation Links */}
-          <nav className="ml-8">
+          <nav>
             <ul className="flex space-x-6">
               <li>
                 <Link href="/about" className="text-gray-600 hover:text-gray-800">
