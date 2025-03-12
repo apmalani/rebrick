@@ -48,7 +48,7 @@ export default function Home() {
       <div className="flex items-center justify-center bg-white" style={{ minHeight: "calc(100vh - 64px)" }}>
         <div className="w-full max-w-2xl pt-4">
           <h1 className="text-5xl font-bold text-center mb-2 text-gray-800">ReBrick</h1>
-          <h2 className="text-xl text-center mb-4 text-gray-500">Search for similar LEGO sets</h2>
+          <h2 className="text-xl text-center mb-4 text-gray-500">Find similar sets & build more with what you have</h2>
           <form onSubmit={handleSubmit} className="relative">
             <input
               type="text"
